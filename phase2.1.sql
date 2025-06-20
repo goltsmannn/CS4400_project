@@ -13,13 +13,14 @@ CREATE TABLE IF NOT EXISTS User (
 
 CREATE TABLE  IF NOT EXISTS Employee (
 	username varchar(40),
-	tax_id CHAR(11) UNIQUE,
+	tax_id CHAR(11) UNIQUE NOT NULL,  -- must be notnull, otherwise fk in worker_workfor will fail (fk cant be null)
 	experience INT,
 	hired DATE,
 	salary DECIMAL(10, 2),
 	PRIMARY KEY (username, tax_id),
 	FOREIGN KEY (username) REFERENCES User(username)
 );
+
 
 
 CREATE TABLE IF NOT EXISTS Worker (
@@ -32,9 +33,9 @@ CREATE TABLE IF NOT EXISTS Worker (
 CREATE TABLE IF NOT EXISTS Driver(
 	username VARCHAR(40),
 	tax_id CHAR(11),
-	licenseID CHAR(6) UNIQUE,
+	licenseID CHAR(6) UNIQUE NOT NULL, -- can't be null. reference: Each driver must have a valid license type to signify that they have received the proper training to operate the van safely
 	successful_trips INT,
-	license_type VARCHAR(5),
+	license_type VARCHAR(5) NOT NULL, -- same as above
 	PRIMARY KEY (username, tax_id),
 	FOREIGN KEY (username, tax_id) REFERENCES Employee(username, tax_id)
 );
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS Service(
 );
 
 -- Service needs a field called home base but not in data ^
+-- isn't that just location xd?
 
 CREATE TABLE IF NOT EXISTS Product(
 	barcode VARCHAR(40) PRIMARY KEY,
@@ -103,8 +105,8 @@ CREATE TABLE IF NOT EXISTS Business(
 CREATE TABLE IF NOT EXISTS Fund (
 	owner_username VARCHAR(40) NOT NULL,
     business_name VARCHAR(40) NOT NULL,
-    amount_invested INT,
-    dt_invested DATE,
+    amount_invested INT, -- should be not null?
+    dt_invested DATE, -- same?
     PRIMARY KEY(owner_username, business_name),
     FOREIGN KEY (owner_username) REFERENCES Owner(username),
     FOREIGN KEY (business_name) REFERENCES Business(name)

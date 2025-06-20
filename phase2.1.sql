@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS User (
 
 CREATE TABLE  IF NOT EXISTS Employee (
 	username varchar(40),
-	tax_id CHAR(11) NOT NULL unique,
+	tax_id CHAR(11) NOT NULL UNIQUE,
 	experience INT NOT NULL,
 	hired DATE NOT NULL,
 	salary DECIMAL(10, 2) NOT NULL,
@@ -36,28 +36,26 @@ CREATE TABLE IF NOT EXISTS Driver(
 );
 
 CREATE TABLE IF NOT EXISTS Service(
-	id varchar(40),
-	name varchar(40),
-	location varchar(40),
-	primary key(ID)
+	id varchar(40) PRIMARY KEY,
+	name varchar(40) NOT NULL,
+	location varchar(40) NOT NULL,
+	FOREIGN KEY (location) REFERENCES Location(location)
 );
 
 
 CREATE TABLE IF NOT EXISTS Location(
-	label varchar(40),
-	x_coord INT,
-	y_coord INT,
-	space INT,
-	primary key(label)
+	label varchar(40) PRIMARY KEY,
+	x_coord INT NOT NULL,
+	y_coord INT NOT NULL,
+	space INT NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS Product(
-	barcode varchar(40),
+	barcode varchar(40) PRIMARY KEY,
 	iname varchar(40),
-    location_label varchar(40),
+    	location_label varchar(40),
 	weight int,
-	primary key(barcode),
-    foreign key (location_label) references Location(label)
+    	FOREIGN KEY (location_label) REFERENCES Location(label)
 );
 
 CREATE TABLE IF NOT EXISTS Van(

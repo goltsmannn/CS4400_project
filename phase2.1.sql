@@ -13,110 +13,112 @@ CREATE TABLE IF NOT EXISTS User (
 
 CREATE TABLE  IF NOT EXISTS Employee (
 	username varchar(40),
-	tax_id CHAR(11) NOT NULL unique,
-	experience INT NOT NULL,
-	hired DATE NOT NULL,
-	salary DECIMAL(10, 2) NOT NULL,
-	foreign KEY (username) REFERENCES User(username),
-	primary key(username, tax_id)
+	tax_id CHAR(11) UNIQUE,
+	experience INT,
+	hired DATE,
+	salary DECIMAL(10, 2),
+	PRIMARY KEY (username, tax_id),
+	FOREIGN KEY (username) REFERENCES User(username)
 );
 
 
 CREATE TABLE IF NOT EXISTS Worker (
-	username VARCHAR(40) PRIMARY KEY,
-	FOREIGN KEY (username) REFERENCES User(username)
+	username VARCHAR(40),
+	tax_id CHAR(11),
+	PRIMARY KEY (username, tax_id),
+	FOREIGN KEY (username, tax_id) REFERENCES Employee(username, tax_id)
 );
 
 CREATE TABLE IF NOT EXISTS Driver(
-	username VARCHAR(40) PRIMARY KEY,
-	licenseID CHAR(6) NOT NULL UNIQUE,
-	successful_trips INT NOT NULL,
-	license_type VARCHAR(5) NOT NULL,
-	FOREIGN KEY (username) REFERENCES User(username)
+	username VARCHAR(40),
+	tax_id CHAR(11),
+	licenseID CHAR(6) UNIQUE,
+	successful_trips INT,
+	license_type VARCHAR(5),
+	PRIMARY KEY (username, tax_id),
+	FOREIGN KEY (username, tax_id) REFERENCES Employee(username, tax_id)
+);
+
+CREATE TABLE IF NOT EXISTS Location(
+	label VARCHAR(40) PRIMARY KEY,
+	location_x_coord INT NOT NULL,
+	location_y_coord INT NOT NULL,
+	space INT NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS Service(
-	id varchar(40),
-	name varchar(40),
-	location varchar(40),
-	primary key(ID)
+	id VARCHAR(40) PRIMARY KEY,
+	name VARCHAR(40) NOT NULL,
+	location varchar(40) NOT NULL,
+	FOREIGN KEY (location) REFERENCES Location(label)
 );
 
-
-CREATE TABLE IF NOT EXISTS Location(
-	label varchar(40),
-	x_coord INT,
-	y_coord INT,
-	space INT,
-	primary key(label)
-);
+-- Service needs a field called home base but not in data ^
 
 CREATE TABLE IF NOT EXISTS Product(
-	barcode varchar(40),
-	iname varchar(40),
-    location_label varchar(40),
-	weight int,
-	primary key(barcode),
-    foreign key (location_label) references Location(label)
+	barcode VARCHAR(40) PRIMARY KEY,
+	iname VARCHAR(40),
+	weight INT,
 );
 
 CREATE TABLE IF NOT EXISTS Van(
-	tag varchar(40),
-	service_id varchar(40),
-	capacity int,
-	sales int,
-	fuel int,
-	foreign key (service_id) references Service(id),
-	primary key(tag, service_id)
+	tag VARCHAR(40) NOT NULL,
+	service_id VARCHAR(40) NOT NULL,
+	capacity INT NOT NULL,
+	sales DECIMAL (10, 2) DEFAULT 0,
+	fuel INT NOT NULL,
+	location VARCHAR(40) NOT NULL,
+	PRIMARY KEY (tag, service_id),
+	FOREIGN KEY (service_id) REFERENCES Service(id)
+	FOREIGN KEY (location) REFERENCES Location(label)
 );
 #
 CREATE TABLE IF NOT EXISTS Product_contain_van(
-	barcode varchar(40),
-	tag varchar(40),
-	service_id varchar(40),
-	price int,
-	quantity int,
-	foreign key (barcode) references Product(barcode),
-	foreign key (tag, service_id) references Van(tag, service_id),
-	primary key(barcode, tag, service_id)
+	barcode VARCHAR(40),
+	tag VARCHAR(40) NOT NULL,
+	service_id VARCHAR(40) NOT NULL,
+	price INT NOT NULL,
+	quantity INT NOT NULL,
+	PRIMARY KEY(barcode, tag, service_id)
+	FOREIGN KEY (barcode) REFERENCES Product(barcode),
+	FOREIGN KEY (tag, service_id) REFERENCES Van(tag, service_id)
 );
 
-#ALTER TABLE Product ADD CONSTRAINT foreign key (label) Location(label);
+-- #ALTER TABLE Product ADD CONSTRAINT foreign key (label) Location(label);
 
 CREATE TABLE IF NOT EXISTS Owner (
-	username varchar(40),
-	primary key(username),
-	foreign key (username) references User(username)
+	username VARCHAR(40) PRIMARY KEY,
+	FOREIGN KEY (username) REFERENCES User(username)	
 );
 
 
 CREATE TABLE IF NOT EXISTS Business(
-	name varchar(40) NOT NULL UNIQUE,
-	rating int,
-	location_label varchar(40),
-	unique(name),
-	check(rating <= 5),
-	primary key(name),
-	foreign key (location_label) references Location(label)
+	name VARCHAR(40) PRIMARY KEY,
+	rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+	spent INT DEFAULT 0
+	location VARCHAR(40) NOT NULL,
+	FOREIGN KEY (location) REFERENCES Location(label)
 );
 
 CREATE TABLE IF NOT EXISTS Fund (
-	owner_username varchar(40),
-    business_name varchar(40),
-    invested float,
-    date date,
-    primary key(owner_username, business_name),
-    foreign key (owner_username) references Owner(username),
-    Foreign key (business_name) references Business(name)
+	owner_username VARCHAR(40) NOT NULL,
+    business_name VARCHAR(40) NOT NULL,
+    amount_invested INT,
+    dt_invested DATE,
+    PRIMARY KEY(owner_username, business_name),
+    FOREIGN KEY (owner_username) REFERENCES Owner(username),
+    FOREIGN KEY (business_name) REFERENCES Business(name)
 );
 
 #
 
 CREATE TABLE IF NOT EXISTS Worker_workfor_service(
-	serviceID varchar(40),
-    tax_id varchar(40),
-    primary key(serviceID, tax_id),
-    foreign key (serviceID) references Service(ID),
-    foreign key (tax_id) references Employee(tax_id)
+	username VARCHAR(40),
+	serviceID VARCHAR(40),
+    tax_id CHAR(11),
+    PRIMARY KEY(username, serviceID, tax_id),
+	FOREIGN KEY(username) REFERENCES Worker(username),
+    FOREIGN KEY(serviceID) REFERENCES Service(id),
+    FOREIGN KEY(tax_id) REFERENCES Employee(tax_id)
 );
 
